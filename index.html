@@ -28,7 +28,7 @@ function fetchPackageInfo(item, dropdownContent) {
   fetch('https://aur.archlinux.org/rpc/v5/info/'+item)
   .then(response => response.json())
   .then(data => {
-    dropdownContent.innerHTML = "<div class='px-4 py-2 text-black'>" + "Description: " + data.results[0].Description + "</div>" + "<div class='px-4 py-2 text-black'>" + "Version: " + data.results[0].Version + "</div>";
+dropdownContent.innerHTML = "<div class='px-4 py-2 text-black'>" + "Description: " + data.results[0].Description + "</div>" + "<div class='px-4 py-2 text-black'>" + "Version: " + data.results[0].Version + "</div>" + "<div class='px-4 py-2 text-black'>" + "AUR: " + "<a href='https://aur.archlinux.org/packages/" + item + "' class='text-blue-500' target='_blank'>https://aur.archlinux.org/packages/" + item + "</a></div>";  
   })
   .catch((error) => {
     console.error('Error:', error);
