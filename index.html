@@ -34,13 +34,17 @@ function searchPackage() {
       dropdown.appendChild(dropdownContent);
       li.appendChild(dropdown);
       ul.appendChild(li);
+      dropdown.onmouseover = function(event) {
+        var rect = dropdown.getBoundingClientRect();
+        dropdownContent.style.left = (event.clientX - rect.left) + 'px';
+        dropdownContent.style.top = (event.clientY - rect.top) + 'px';
+      }
       fetch('https://aur.archlinux.org/rpc/v5/info/'+item)
       .then(response => response.json())
       .then(data => {
         dropdownContent.innerHTML = "<div class='px-4 py-2 text-black'>" + "Description: " + data.results[0].Description + "</div>" + "<div class='px-4 py-2 text-black'>" + "Version: " + data.results[0].Version + "</div>";
       })
-      .catch((error) =>
- {
+      .catch((error) => {
         console.error('Error:', error);
       });
     });
