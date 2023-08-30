@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #282c34;
+            color: white;
+            padding: 20px;
+        }
+        #packageList {
+            list-style-type: none;
+            padding: 0;
+        }
+        #packageList li {
+            padding: 10px;
+            background-color: #44475a;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        #packageName {
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            color: black;
+        }
+        .dropdown-content {
+            display: none;
+            background-color: #44475a;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Search AUR Packages</h2>
+
+<input type="text" id="packageName" onkeyup="searchPackage()" placeholder="Search for packages..">
+
+<ul id="packageList">
+</ul>
+
+<script>
+function searchPackage() {
+  var input, filter;
+  input = document.getElementById('packageName');
+  filter = input.value;
+
+  fetch('https://aur.archlinux.org/rpc/v5/suggest/'+filter)
+  .then(response => response.json())
+  .then(data => {
+    var ul = document.getElementById("packageList");
+    ul.innerHTML = '';
+    data.forEach(item => {
+      var li = document.createElement("li");
+      var dropdown = document.createElement("div");
+      dropdown.className = "dropdown";
+      var dropdownContent = document.createElement("div");
+      dropdownContent.className = "dropdown-content";
+      dropdown.appendChild(document.createTextNode(item));
+      dropdown.appendChild(dropdownContent);
+      li.appendChild(dropdown);
+      ul.appendChild(li);
+      fetch('https://aur.archlinux.org/rpc/v5/info/'+item)
+     .then(response => response.json())
+      .then(data => {
+	      dropdownContent.innerHTML = "Description: " + data.results[0].Description + "<br/>Version: " + data.results[0].Version;
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+    });
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
+}
+</script>
+
+</body>
+</html>
