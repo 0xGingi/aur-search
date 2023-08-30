@@ -7,20 +7,48 @@
 
 <h2 class="text-3xl font-extrabold">Search Packages</h2>
 
-<input type="text" id="packageName" onkeyup="searchPackage()" placeholder="Search for packages.." class="w-1/4 p-2 mt-6 rounded bg-white text-gray-800">
+<input type="text" id="packageName" onkeyup="debounce(searchPackage, 300)" placeholder="Search for packages.." class="w-1/4 p-2 mt-6 rounded bg-white text-gray-800">
+
+<div id="loading" class="mt-6" style="display: none;">Loading...</div>
 
 <ul id="packageList" class="divide-y divide-gray-600 w-1/4 mt-6">
 </ul>
 
+<div id="error" class="mt-6 text-red-500" style="display: none;"></div>
+
 <script>
+var timer;
+
+function debounce(func, delay) {
+  clearTimeout(timer);
+  timer = setTimeout(func, delay);
+}
+
+function fetchPackageInfo(item, dropdownContent) {
+  fetch('https://aur.archlinux.org/rpc/v5/info/'+item)
+  .then(response => response.json())
+  .then(data => {
+    dropdownContent.innerHTML = "<div class='px-4 py-2 text-black'>" + "Description: " + data.results[0].Description + "</div>" + "<div class='px-4 py-2 text-black'>" + "Version: " + data.results[0].Version + "</div>";
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+    document.getElementById("error").style.display = "block";
+    document.getElementById("error").innerText = "Failed to fetch package info";
+  });
+}
+
 function searchPackage() {
   var input, filter;
   input = document.getElementById('packageName');
   filter = input.value;
 
+  document.getElementById("loading").style.display = "block";
+  document.getElementById("error").style.display = "none";
+
   fetch('https://aur.archlinux.org/rpc/v5/suggest/'+filter)
   .then(response => response.json())
   .then(data => {
+    document.getElementById("loading").style.display = "none";
     var ul = document.getElementById("packageList");
     ul.innerHTML = '';
     data.forEach(item => {
@@ -39,18 +67,14 @@ function searchPackage() {
         dropdownContent.style.left = (event.clientX - rect.left) + 'px';
         dropdownContent.style.top = (event.clientY - rect.top) + 'px';
       }
-      fetch('https://aur.archlinux.org/rpc/v5/info/'+item)
-      .then(response => response.json())
-      .then(data => {
-        dropdownContent.innerHTML = "<div class='px-4 py-2 text-black'>" + "Description: " + data.results[0].Description + "</div>" + "<div class='px-4 py-2 text-black'>" + "Version: " + data.results[0].Version + "</div>";
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+      fetchPackageInfo(item, dropdownContent);
     });
   })
   .catch((error) => {
     console.error('Error:', error);
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("error").style.display = "block";
+    document.getElementById("error").innerText = "Failed to fetch packages";
   });
 }
 </script>
